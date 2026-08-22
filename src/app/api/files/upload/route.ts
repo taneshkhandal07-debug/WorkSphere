@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { join } from 'path';
-import { mkdir, writeFile } from 'fs/promises';
+import { mkdir, writeFile, unlink } from 'fs/promises';
 import { prisma } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 
@@ -33,9 +33,26 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create public/uploads directory if not exists
-    const uploadsDir = join(process.cwd(), 'public', 'uploads');
-    await mkdir(uploadsDir, { recursive: true });
+    // Create uploads directory. If running on Vercel or in a read-only environment,
+    // use /tmp/uploads instead of public/uploads.
+    let uploadsDir = join(process.cwd(), 'public', 'uploads');
+    let useTmp = !!process.env.VERCEL;
+
+    if (!useTmp) {
+      try {
+        await mkdir(uploadsDir, { recursive: true });
+        const testFile = join(uploadsDir, '.write-test-' + Date.now());
+        await writeFile(testFile, '');
+        await unlink(testFile).catch(() => {});
+      } catch (err) {
+        useTmp = true;
+      }
+    }
+
+    if (useTmp) {
+      uploadsDir = '/tmp/uploads';
+      await mkdir(uploadsDir, { recursive: true });
+    }
 
     // Generate clean unique filename to avoid collision
     const sanitizedOriginalName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');

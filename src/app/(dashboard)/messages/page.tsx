@@ -190,9 +190,20 @@ export default function MessagesPage() {
 
   // WebSocket Connection
   useEffect(() => {
-    // Connect to WebSocket Server on port 3001
+    // Connect to WebSocket Server
     const connectWS = () => {
-      const ws = new WebSocket('ws://localhost:3001');
+      const isLocalhost = typeof window !== 'undefined' && 
+        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      const defaultWsUrl = isLocalhost ? 'ws://localhost:3001' : '';
+      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || defaultWsUrl;
+
+      if (!wsUrl) {
+        console.log('Real-Time WebSockets disabled (no NEXT_PUBLIC_WS_URL configured). Using fallback HTTP REST polling.');
+        return;
+      }
+
+      console.log(`Connecting to WebSocket: ${wsUrl}`);
+      const ws = new WebSocket(wsUrl);
       socketRef.current = ws;
 
       ws.onopen = () => {
