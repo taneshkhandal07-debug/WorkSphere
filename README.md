@@ -1,5 +1,6 @@
 # WorkSphere
-Live Link: work-sphere-sandy.vercel.app
+Live Link: [work-sphere-sandy.vercel.app](https://work-sphere-sandy.vercel.app/)
+
 > **One Workspace. Every Workflow.**
 
 WorkSphere is a unified full-stack enterprise collaboration and workforce management platform that combines team communication, task boards, attendance logs, files, and admin utilities into a cohesive digital workspace.
