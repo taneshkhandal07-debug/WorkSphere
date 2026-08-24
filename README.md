@@ -68,7 +68,7 @@ Verify or create a `.env` file in the root directory:
 ```env
 DATABASE_URL="file:./dev.db"
 SESSION_SECRET="worksphere_default_secret_key_session_signing_auth_9988"
-# Optional: Set custom WebSocket URL if running a external WS server
+# Optional: Set custom WebSocket URL if running an external WS server
 NEXT_PUBLIC_WS_URL="ws://localhost:3001"
 ```
 
