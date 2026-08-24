@@ -60,8 +60,8 @@ Use these credentials to sign in and test different user roles and account statu
 
 | Role | Email Address | Password | Status | Access |
 |---|---|---|---|---|
-| **Super Admin** | `admin@worksphere.com` | `password123` | `ACTIVE` | Full administration, analytics, logs, permissions |
-| **HR Manager** | `hr@worksphere.com` | `password123` | `ACTIVE` | Account approvals, directory review, updates |
-| **Manager** | `manager@worksphere.com` | `password123` | `ACTIVE` | Project planning, task board assignments |
-| **Employee** | `employee@worksphere.com` | `password123` | `ACTIVE` | Session check-in, task updates, messaging |
-| **Pending User** | `pending@worksphere.com` | `password123` | `PENDING` | Redirected to **Awaiting Approval** review card |
+| **Super Admin** | `admin@worksphere.com` | `Password1234` | `ACTIVE` | Full administration, analytics, logs, permissions |
+| **HR Manager** | `hr@worksphere.com` | `Password1234` | `ACTIVE` | Account approvals, directory review, updates |
+| **Manager** | `manager@worksphere.com` | `Password1234` | `ACTIVE` | Project planning, task board assignments |
+| **Employee** | `employee@worksphere.com` | `Password1234` | `ACTIVE` | Session check-in, task updates, messaging |
+| **Pending User** | `pending@worksphere.com` | `Password1234` | `PENDING` | Redirected to **Awaiting Approval** review card |
