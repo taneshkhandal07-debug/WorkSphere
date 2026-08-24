@@ -68,7 +68,7 @@ async function main() {
 
   // 4. Create Users (Super Admin, HR, Managers, Employees, Pendings)
   console.log('- Seeding Users...');
-  const pw = await bcrypt.hash('password123', 10);
+  const pw = await bcrypt.hash('Password1234', 10);
 
   // Super Admin
   const adminUser = await prisma.user.create({

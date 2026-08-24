@@ -98,6 +98,7 @@ export default function MessagesPage() {
 
   // Real-time WS & Polling states
   const socketRef = useRef<WebSocket | null>(null);
+  const wsRetryCountRef = useRef<number>(0);
   const [typingUser, setTypingUser] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -202,40 +203,59 @@ export default function MessagesPage() {
         return;
       }
 
+      if (wsRetryCountRef.current >= 3) {
+        console.log('Max WebSocket reconnect attempts reached. Operating in HTTP REST polling fallback mode.');
+        return;
+      }
+
       console.log(`Connecting to WebSocket: ${wsUrl}`);
-      const ws = new WebSocket(wsUrl);
-      socketRef.current = ws;
+      try {
+        const ws = new WebSocket(wsUrl);
+        socketRef.current = ws;
 
-      ws.onopen = () => {
-        console.log('Real-Time WebSocket Link Established.');
-      };
+        ws.onopen = () => {
+          console.log('Real-Time WebSocket Link Established.');
+          wsRetryCountRef.current = 0; // Reset counter on successful connection
+        };
 
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          
-          if (data.type === 'message' && activeConversation && data.conversationId === activeConversation.id) {
-            fetchMessages(activeConversation.id);
-          }
-
-          if (data.type === 'typing' && activeConversation && data.conversationId === activeConversation.id) {
-            if (data.userId !== currentUser?.id) {
-              setTypingUser(data.username);
-              if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-              typingTimeoutRef.current = setTimeout(() => {
-                setTypingUser(null);
-              }, 2000);
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === 'message' && activeConversation && data.conversationId === activeConversation.id) {
+              fetchMessages(activeConversation.id);
             }
-          }
-        } catch (err) {
-          console.error('WS Frame error:', err);
-        }
-      };
 
-      ws.onclose = () => {
-        console.log('WS Connection closed. Attempting reconnect in 5s...');
-        setTimeout(connectWS, 5000);
-      };
+            if (data.type === 'typing' && activeConversation && data.conversationId === activeConversation.id) {
+              if (data.userId !== currentUser?.id) {
+                setTypingUser(data.username);
+                if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                typingTimeoutRef.current = setTimeout(() => {
+                  setTypingUser(null);
+                }, 2000);
+              }
+            }
+          } catch (err) {
+            console.error('WS Frame error:', err);
+          }
+        };
+
+        ws.onerror = () => {
+          // Silent catch to prevent uncaught console exception
+        };
+
+        ws.onclose = () => {
+          wsRetryCountRef.current += 1;
+          if (wsRetryCountRef.current < 3) {
+            console.log(`WS Connection closed. Retry attempt ${wsRetryCountRef.current}/3 in 5s...`);
+            setTimeout(connectWS, 5000);
+          } else {
+            console.log('WebSocket link unavailable. Falling back seamlessly to HTTP REST polling.');
+          }
+        };
+      } catch (e) {
+        console.warn('Could not initialize WebSocket:', e);
+      }
     };
 
     if (currentUser) {
